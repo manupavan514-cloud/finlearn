@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FinLearn: Investment Banking</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #141414; --bg2: #0b0b0b; --text: #fff; --muted: #b3b3b3; --red: #c6f08f;
+  --card: #2a2a2a; --line: #333; --ok: #9fe870;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow-x: hidden; }
+button, input, select { font: inherit; }
+/* LINKEDIN: 4 options (nav pill, hero button, footer card, floating badge) */
+.li-ico { width: 18px; height: 18px; flex: none; fill: currentColor; }
+.li-hero { margin-left: 8px; background: #0a66c2; color: #fff; }
+.li-hero:hover { background: #0b78e3; }
+@media (max-width: 700px) { .li-hero { margin-left: 0; margin-top: 8px; } }
+
+/* NAV */
+nav { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; z-index: 20; display: flex; align-items: center; gap: 18px; padding: 14px 4%; background: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,0)); transition: background .3s; }
+nav.solid { background: var(--bg2); }
+.logo { color: var(--red); font-weight: 900; font-size: 22px; letter-spacing: 1px; }
+.tabs { display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
+.tabs button { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; white-space: nowrap; padding: 4px 0; }
+.tabs button.active, .tabs button:hover { color: var(--text); font-weight: 600; }
+.search { margin-left: auto; }
+.search input { background: rgba(0,0,0,.7); border: 1px solid #555; color: #fff; padding: 7px 12px; border-radius: 4px; width: 200px; }
+.search input::placeholder { color: #888; }
+
+/* VIEWS */
+.view { display: none; padding-top: 70px; }
+.view.show { display: block; }
+
+/* HERO */
+.hero { position: relative; height: 62vh; min-height: 380px; display: flex; align-items: flex-end; }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg) 5%, rgba(20,20,20,.35) 55%, rgba(0,0,0,.3)), linear-gradient(to right, rgba(20,20,20,.9), transparent 65%); }
+.hero-body { position: relative; z-index: 2; padding: 0 4% 40px; max-width: 640px; }
+.hero h1 { font-size: clamp(26px, 4.5vw, 46px); margin: 0 0 10px; line-height: 1.1; }
+.hero p { color: #e5e5e5; margin: 0 0 18px; font-size: clamp(14px, 1.5vw, 16px); }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 4px; border: none; font-weight: 600; font-size: 15px; cursor: pointer; text-decoration: none; }
+.btn-play { background: #fff; color: #000; }
+.btn-play:hover { background: rgba(255,255,255,.75); }
+.btn-ghost { background: rgba(109,109,110,.7); color: #fff; margin-left: 8px; }
+.btn-ghost:hover { background: rgba(109,109,110,.4); }
+
+/* ROWS */
+.row { margin: 0 0 28px; }
+.row-head { display: flex; align-items: baseline; justify-content: space-between; margin: 0 4% 8px; }
+.row h2 { font-size: 18px; margin: 0; }
+.row .see { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px; }
+.row .see:hover { color: var(--text); }
+.slider { display: flex; gap: 10px; overflow-x: auto; padding: 6px 4% 14px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.slider::-webkit-scrollbar { display: none; }
+
+/* TOPIC CARDS (home) */
+.topic-card { flex: 0 0 auto; width: clamp(190px, 26vw, 250px); aspect-ratio: 16/9; border-radius: 6px; padding: 14px; display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer; position: relative; overflow: hidden; transition: transform .25s; scroll-snap-align: start; border: none; color: #fff; text-align: left; }
+.topic-card:hover, .topic-card:focus { transform: scale(1.05); outline: none; box-shadow: 0 10px 30px rgba(0,0,0,.7); }
+.topic-card .t { font-weight: 800; font-size: 17px; position: relative; }
+.topic-card .s { font-size: 12px; color: #ddd; position: relative; margin-top: 4px; }
+.topic-card .n { position: absolute; top: 10px; right: 12px; font-size: 12px; color: #fff; background: rgba(0,0,0,.45); padding: 2px 8px; border-radius: 999px; }
+
+/* VIDEO TILES */
+.tile { flex: 0 0 auto; width: clamp(200px, 26vw, 250px); border-radius: 6px; overflow: hidden; background: var(--card); cursor: pointer; scroll-snap-align: start; transition: transform .25s; display: flex; flex-direction: column; }
+.tile:hover { transform: scale(1.05); z-index: 3; box-shadow: 0 10px 30px rgba(0,0,0,.7); }
+.tile .thumb { aspect-ratio: 16/9; padding: 12px; display: flex; flex-direction: column; justify-content: flex-end; position: relative; }
+.tile .thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.85), transparent 60%); }
+.tile .thumb span { position: relative; z-index: 1; font-weight: 700; font-size: 14px; line-height: 1.2; }
+.tile .info { padding: 10px 12px 12px; font-size: 12px; color: var(--muted); }
+.tile .info b { color: #eee; display: block; font-size: 13px; margin-bottom: 3px; }
+.badge { display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: .5px; padding: 2px 6px; border-radius: 3px; background: #444; color: #fff; margin-top: 6px; }
+.badge.web { background: #5fae4a; }
+
+/* VIDEOS VIEW */
+.page { padding: 0 4% 60px; }
+.page h2 { font-size: 22px; margin: 6px 0 4px; }
+.page .sub { color: var(--muted); font-size: 14px; margin-bottom: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.chips select { background: #222; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 8px 10px; }
+.chips label { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); margin-top: 12px; }
+.grid .tile { width: 100%; }
+.empty { color: var(--muted); padding: 40px 0; text-align: center; }
+
+/* RESOURCES */
+.res-group { margin-bottom: 22px; }
+.res-group h3 { font-size: 16px; margin: 0 0 8px; color: #fff; }
+.res { display: flex; justify-content: space-between; gap: 12px; align-items: center; background: #1f1f1f; border-radius: 6px; padding: 12px 14px; margin-bottom: 8px; }
+.res div { font-size: 13px; color: var(--muted); }
+.res a { color: #fff; font-weight: 600; text-decoration: none; font-size: 14px; }
+.res a:hover { text-decoration: underline; }
+.res .tag { font-size: 11px; color: #aaa; border: 1px solid #444; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+
+/* PROJECTS */
+.proj { background: #1f1f1f; border-radius: 8px; margin-bottom: 14px; overflow: hidden; }
+.proj-head { padding: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.proj-head h3 { margin: 0; font-size: 17px; }
+.proj-head .meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.proj-head .pct { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.proj.done .pct { color: var(--ok); }
+.proj-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--line); }
+.proj.open .proj-body { display: block; }
+.proj-body p { color: #ddd; font-size: 14px; margin: 12px 0; }
+.proj-body .src { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.proj-body .src a { color: #fff; }
+.step { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+.step:last-child { border-bottom: none; }
+.step input { margin-top: 3px; accent-color: var(--ok); }
+.step.done span { color: var(--muted); text-decoration: line-through; }
+
+/* ADD FORM */
+.form { display: grid; gap: 10px; grid-template-columns: 1fr; max-width: 640px; }
+@media (min-width: 640px) { .form { grid-template-columns: 1fr 1fr; } }
+.form .full { grid-column: 1 / -1; }
+.form input, .form select { background: #2a2a2a; border: 1px solid #444; color: #fff; padding: 10px 12px; border-radius: 4px; }
+.form .btn { justify-content: center; border: none; }
+
+/* HERO MONEY PILE (notes spread on a table) */
+.hero-pile { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at 65% 40%, #1f4a2a 0%, #0f2716 55%, #08140c 100%); }
+.hero-pile .n { position: absolute; width: var(--w); transform: translate(-50%, -50%) rotate(var(--r)); opacity: .92; animation: nmove var(--t) ease-in-out infinite alternate; will-change: translate; }
+.hero-pile.paused .n { animation-play-state: paused; }
+@keyframes nmove { from { translate: 0 0; } to { translate: var(--mx) var(--my); } }
+@media (prefers-reduced-motion: reduce) { .hero-pile .n { animation: none; } }
+.hero-pile .n svg { width: 100%; height: auto; display: block; border-radius: 8px; }
+
+/* TOPIC ART */
+.topic-card .art { position: absolute; inset: 0; z-index: 0; }
+.topic-card .art svg { width: 100%; height: 100%; display: block; }
+.topic-card::after { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.25) 55%, rgba(0,0,0,.05) 100%); }
+.topic-card .t, .topic-card .s, .topic-card .n { z-index: 2; }
+.topic-card:hover .art svg { transform: scale(1.06); }
+.topic-card .art svg { transition: transform .4s; }
+
+/* AESTHETIC LAYER */
+body { background: radial-gradient(1200px 600px at 10% -10%, #3d5a36 0%, transparent 60%), radial-gradient(900px 500px at 100% 0%, #4d6b43 0%, transparent 55%), #161f14; }
+.hero { background: none !important; }
+.hero::before { content: ""; position: absolute; inset: -10%; background: radial-gradient(600px 300px at 20% 30%, rgba(170,240,120,.45), transparent 70%), radial-gradient(500px 300px at 80% 20%, rgba(34,197,94,.25), transparent 70%); animation: drift 14s ease-in-out infinite alternate; will-change: transform; }
+@keyframes drift { from { transform: translate3d(-2%, 0, 0); } to { transform: translate3d(3%, -2%, 0); } }
+.hero h1 { background: linear-gradient(90deg, #fff, #eaffd6 50%, #9be36f); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+.btn-play { box-shadow: 0 6px 24px rgba(255,255,255,.12); }
+.topic-card { box-shadow: 0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.08); }
+.tile { border: 1px solid rgba(255,255,255,.06); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.proj { border: 1px solid rgba(255,255,255,.07); transition: transform .2s, border-color .2s; }
+.proj:hover { border-color: rgba(34,197,94,.45); }
+.tabs button.active { text-shadow: 0 0 14px rgba(170,240,120,.7); }
+nav.solid { backdrop-filter: blur(10px); }
+nav::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, #4f9a3e, #e6ffd6 40%, #9be36f 70%, #4f9a3e); }
+
+/* FALLING DOLLARS */
+.money { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; transform: translate3d(0, calc(var(--sy, 0) * -0.45px), 0); }
+.view { position: relative; z-index: 1; }
+.bill {
+  position: absolute; top: -220px; width: var(--w); aspect-ratio: 2.35 / 1; border-radius: 7px;
+  background: linear-gradient(135deg, #1d5b2f 0%, #3f9a52 45%, #1a4d29 100%);
+  border: 2px solid rgba(200,255,210,.35);
+  box-shadow: inset 0 0 0 4px rgba(0,0,0,.18), 0 0 18px rgba(34,197,94,.25);
+  color: #d8ffe0; display: flex; align-items: center; justify-content: space-between; padding: 0 9%;
+  font-family: Georgia, 'Times New Roman', serif; font-weight: 700; letter-spacing: .5px;
+  opacity: var(--o); animation: roll var(--t) linear var(--d) infinite; will-change: transform;
+}
+.bill .v { font-size: calc(var(--w) * .11); line-height: 1; }
+.bill .c { width: 42%; aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(216,255,224,.55); display: flex; align-items: center; justify-content: center; font-size: calc(var(--w) * .16); }
+.bill::after { content: attr(data-label); position: absolute; left: 0; right: 0; bottom: 6%; text-align: center; font-size: calc(var(--w) * .045); letter-spacing: 3px; opacity: .6; }
+@keyframes roll {
+  0%   { transform: translate3d(0, 0, 0) rotate(var(--r0)) rotateX(0deg); }
+  100% { transform: translate3d(var(--dx), 130vh, 0) rotate(var(--r1)) rotateX(900deg); }
+}
+.bill.inr { background: linear-gradient(135deg, #7a3f12 0%, #d98a2b 45%, #6b3a10 100%); border-color: rgba(255,240,215,.4); color: #fff4e0; box-shadow: inset 0 0 0 4px rgba(0,0,0,.15), 0 0 18px rgba(217,138,43,.3); }
+.back { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); color: #fff; padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+.back:hover { background: rgba(255,255,255,.16); }
+.back:disabled { opacity: .35; cursor: default; }
+.hero { overflow: hidden; }
+.hero-notes { position: absolute; right: 4%; top: 50%; transform: translateY(calc(-50% + var(--sy, 0) * 0.3px)) rotate(calc(var(--sy, 0) * 0.02deg)); width: min(44vw, 520px); display: flex; flex-direction: column; gap: 22px; z-index: 1; pointer-events: none; }
+.hero-notes svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 8px 14px rgba(0,0,0,.55)); border-radius: 8px; animation: floatNote 9s ease-in-out infinite alternate; }
+.hero-notes svg:first-child { transform: rotate(-5deg) translateX(-6%); }
+.hero-notes svg:last-child { transform: rotate(4deg) translateX(8%); animation-delay: -4s; }
+@keyframes floatNote { from { translate: 0 -6px; } to { translate: 0 8px; } }
+@media (max-width: 700px) { .hero-notes { width: 70vw; right: 2%; top: 28%; gap: 14px; } }
+.svgbill { background: none; border: none; box-shadow: none; padding: 0; justify-content: center; aspect-ratio: auto; }
+.svgbill::after { content: none; }
+.svgbill svg { width: 100%; height: auto; display: block; border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) { .bill, .hero::before { animation: none; } }
+@media (max-width: 700px) { .tabs { display: none; } .search input { width: 140px; } }
+</style>
+</head>
+<body>
+<div class="money" id="money" aria-hidden="true"></div>
+
+<nav id="nav">
+  <div class="logo">FINLEARN</div>
+  <button class="back" id="backBtn" disabled>&larr; Back</button>
+  <div class="tabs" id="tabs">
+    <button class="active" data-view="home">Home</button>
+    <button data-view="videos">Videos</button>
+    <button data-view="resources">Resources</button>
+    <button data-view="projects">Projects</button>
+    <button data-view="add">Add video</button>
+  </div>
+  <div class="search"><input id="q" type="search" placeholder="Search videos"></div>
+</nav>
+
+<!-- HOME -->
+<section class="view show" id="v-home">
+  <div class="hero">
+    <div class="hero-pile" id="heroPile" aria-hidden="true"></div>
+    <div class="hero-notes" id="heroNotes" aria-hidden="true"></div>
+    <div class="hero-body">
+      <h1>Learn investment banking, one topic at a time</h1>
+      <p>Pick a topic below. Each one opens its videos. Start with Excel, then accounting, then modelling and valuation.</p>
+      <button class="btn btn-play" data-open-topic="Excel">&#9654; Start with Excel</button>
+      <button class="btn btn-ghost" data-view-link="projects">Projects</button>
+      <!-- LinkedIn option 2: hero button -->
+      <a class="btn li-hero" href="https://www.linkedin.com/in/manopavansai" target="_blank" rel="noopener noreferrer"><svg class="li-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>Connect on LinkedIn</a>
+    </div>
+  </div>
+  <div id="homeRows"></div>
+</section>
+
+<!-- VIDEOS -->
+<section class="view" id="v-videos">
+  <div class="page">
+    <h2 id="videosTitle">All videos</h2>
+    <div class="sub" id="videosSub"></div>
+    <div class="chips">
+      <label>Topic<select id="fTopic"></select></label>
+      <label>Teacher / creator<select id="fCreator"></select></label>
+      <label>School / channel<select id="fSchool"></select></label>
+      <label>Type<select id="fType">
+        <option value="">All</option><option value="YouTube">YouTube</option><option value="Website">Website / course</option>
+      </select></label>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<!-- RESOURCES -->
+<section class="view" id="v-resources">
+  <div class="page">
+    <h2>Resources</h2>
+    <div class="sub">Reference sites and tools. Separate from the video library.</div>
+    <div id="resList"></div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section class="view" id="v-projects">
+  <div class="page">
+    <h2>Projects with public data</h2>
+    <div class="sub">Real work using public filings. Tick steps as you finish them. Progress saves in this browser.</div>
+    <div id="projList"></div>
+  </div>
+</section>
+
+<!-- ADD -->
+<section class="view" id="v-add">
+  <div class="page">
+    <h2>Add a video</h2>
+    <div class="sub">YouTube or any website link. Added videos appear under their topic.</div>
+    <div class="form">
+      <input id="a-title" placeholder="Title">
+      <input id="a-url" placeholder="Link (YouTube or website)">
+      <select id="a-topic"></select>
+      <input id="a-creator" placeholder="Teacher / creator">
+      <input id="a-school" placeholder="School / channel">
+      <select id="a-type"><option>YouTube</option><option>Website</option></select>
+      <button class="btn btn-play full" id="aBtn">Add video</button>
+    </div>
+  </div>
+</section>
+
+
+
+<script>
+// ---------- DATA ----------
+const TOPICS = [
+  { name: "Excel", desc: "Formulas, shortcuts, modelling in Excel" },
+  { name: "Accounting", desc: "Three statements and how they link" },
+  { name: "Corporate Finance", desc: "TVM, NPV, IRR, WACC" },
+  { name: "Financial Modelling", desc: "Forecasts, schedules, three-statement models" },
+  { name: "DCF", desc: "Discounted cash flow valuation" },
+  { name: "Comps", desc: "Trading comparables and multiples" },
+  { name: "M&A", desc: "Accretion/dilution, deal structure" },
+  { name: "LBO", desc: "Leveraged buyout models" },
+  { name: "Markets", desc: "Equity, debt, IPOs, rates" },
+  { name: "Interviews", desc: "Technical and behavioural prep" },
+  { name: "AI", desc: "AI tools and prompts for IB work" }
+];
+
+const SEED = [
+  // START HERE intro videos: first item in each topic. Search links for now; replace with specific videos.
+  { title: "Top Excel Shortcuts for Finance and Modelling (ex-JP Morgan analyst, rareliquid)", url: "https://youtu.be/oDjhg57XH-A", topic: "Excel", creator: "rareliquid", school: "rareliquid", type: "YouTube" },
+  { title: "START HERE: Excel basics for beginners", url: "https://www.youtube.com/results?search_query=Excel+basics+for+beginners+tutorial", topic: "Excel", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "START HERE: How Excel is used in investment banking", url: "https://www.youtube.com/results?search_query=how+Excel+is+used+in+investment+banking", topic: "Excel", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "START HERE: The three financial statements and why they matter", url: "https://www.youtube.com/results?search_query=three+financial+statements+explained+for+beginners", topic: "Accounting", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "START HERE: Time value of money, NPV and IRR explained", url: "https://www.youtube.com/results?search_query=NPV+IRR+time+value+of+money+explained", topic: "Corporate Finance", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "START HERE: What is financial modelling and how bankers use it", url: "https://www.youtube.com/results?search_query=what+is+financial+modeling+investment+banking", topic: "Financial Modelling", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "START HERE: What is a DCF and how it is used in investment banking", url: "https://www.youtube.com/results?search_query=what+is+DCF+valuation+used+in+investment+banking", topic: "DCF", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "How to Build a DCF: step-by-step (ex-JP Morgan banker, rareliquid)", url: "https://youtu.be/nyot7FkYoqM", topic: "DCF", creator: "rareliquid", school: "rareliquid", type: "YouTube" },
+  { title: "START HERE: What are trading comps and how bankers use them", url: "https://www.youtube.com/results?search_query=comparable+company+analysis+explained+investment+banking", topic: "Comps", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "START HERE: What is M&A and accretion/dilution", url: "https://www.youtube.com/results?search_query=what+is+M%26A+accretion+dilution+explained", topic: "M&A", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "START HERE: What is an LBO and why private equity uses it", url: "https://www.youtube.com/results?search_query=what+is+LBO+leveraged+buyout+explained", topic: "LBO", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "START HERE: How financial markets, IPOs and bonds work", url: "https://www.youtube.com/results?search_query=how+IPO+and+bond+markets+work+explained", topic: "Markets", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "START HERE: Investment banking interviews, what to expect", url: "https://www.youtube.com/results?search_query=investment+banking+interview+what+to+expect", topic: "Interviews", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "START HERE: How AI is used in investment banking", url: "https://www.youtube.com/results?search_query=how+AI+is+used+in+investment+banking", topic: "AI", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "Financial Modeling Tutorials by CFI (22 videos)", url: "https://www.youtube.com/playlist?list=PLl3-0Xe_motRRI5OKbpU2BHLWsiglKCj8", topic: "Financial Modelling", creator: "Corporate Finance Institute", school: "Corporate Finance Institute", type: "YouTube" },
+  // Three-statement (Finamodel list, YouTube IDs from that page)
+  { title: "Build a Three-Statement Model in 30 Minutes", url: "https://www.youtube.com/watch?v=UMYDxmiVin4", topic: "Financial Modelling", creator: "CFI team", school: "Corporate Finance Institute", type: "YouTube" },
+  { title: "Build a 3-Statement Financial Model [Free Course]", url: "https://www.youtube.com/watch?v=Rmi9fwkJjHw", topic: "Financial Modelling", creator: "WSP team", school: "Wall Street Prep", type: "YouTube" },
+  { title: "Build a 3 Statement Financial Model (Full Tutorial + Template)", url: "https://www.youtube.com/watch?v=1KvrQOQPCDI", topic: "Financial Modelling", creator: "Kenji Explains", school: "Kenji Explains", type: "YouTube" },
+  { title: "3-Statement Model: 90-Minute Case Study from a Blank Sheet", url: "https://www.youtube.com/watch?v=O2uPNfErmJo", topic: "Financial Modelling", creator: "M&I / BIWS", school: "Mergers & Inquisitions", type: "YouTube" },
+  { title: "How to Link the 3 Financial Statements in Excel", url: "https://www.youtube.com/watch?v=b4sk5gRDGnk", topic: "Accounting", creator: "CFI team", school: "Corporate Finance Institute", type: "YouTube" },
+  // DCF
+  { title: "Build a Discounted Cash Flow (DCF) Model in Excel", url: "https://www.youtube.com/watch?v=CfkFFk-r9aA", topic: "DCF", creator: "CFI team", school: "Corporate Finance Institute", type: "YouTube" },
+  { title: "Building a DCF Model, Part 1", url: "https://www.youtube.com/watch?v=XL71PBhcs2M", topic: "DCF", creator: "WSP team", school: "Wall Street Prep", type: "YouTube" },
+  { title: "Building a DCF Model, Part 2", url: "https://www.youtube.com/watch?v=bCCrACXrVPQ", topic: "DCF", creator: "WSP team", school: "Wall Street Prep", type: "YouTube" },
+  { title: "NVIDIA DCF Valuation Model Built From Scratch", url: "https://www.youtube.com/watch?v=GT0-J7b8SWw", topic: "DCF", creator: "rareliquid", school: "rareliquid", type: "YouTube" },
+  // LBO
+  { title: "Simple LBO Model, Part 1", url: "https://www.youtube.com/watch?v=vMzL4D8LyV0", topic: "LBO", creator: "WSP team", school: "Wall Street Prep", type: "YouTube" },
+  { title: "Simple LBO Model, Part 2", url: "https://www.youtube.com/watch?v=1i4ED_RogqE", topic: "LBO", creator: "WSP team", school: "Wall Street Prep", type: "YouTube" },
+  { title: "Simple LBO Model, Part 3", url: "https://www.youtube.com/watch?v=FAu7Jvnd94k", topic: "LBO", creator: "WSP team", school: "Wall Street Prep", type: "YouTube" },
+  // Excel
+  { title: "Core Excel Skills, Part 1: Functions", url: "https://www.youtube.com/playlist?list=PLC5TgH9ub6K0", topic: "Excel", creator: "Excel MVPs (CFA Institute series)", school: "CFA Institute", type: "YouTube" },
+  { title: "Excel beginner tutorial (search)", url: "https://www.youtube.com/results?search_query=Excel+beginner+tutorial+Microsoft+Excel", topic: "Excel", creator: "Search", school: "YouTube search", type: "YouTube" },
+  // Accounting / Corporate finance
+  { title: "Financial accounting: three statements (search)", url: "https://www.youtube.com/results?search_query=financial+accounting+three+financial+statements+beginner", topic: "Accounting", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "Aswath Damodaran valuation lectures (search)", url: "https://www.youtube.com/results?search_query=Aswath+Damodaran+valuation+lectures", topic: "Corporate Finance", creator: "Aswath Damodaran", school: "NYU Stern", type: "YouTube" },
+  // Comps / M&A / Interviews
+  { title: "Comparable company analysis (search)", url: "https://www.youtube.com/results?search_query=comparable+company+analysis+investment+banking", topic: "Comps", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "Accretion/dilution tutorial (search)", url: "https://www.youtube.com/results?search_query=mergers+acquisitions+accretion+dilution+tutorial", topic: "M&A", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "Technical interview questions (search)", url: "https://www.youtube.com/results?search_query=investment+banking+technical+interview+questions+accounting+valuation", topic: "Interviews", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "AI tools for investment banking analysts (search)", url: "https://www.youtube.com/results?search_query=AI+tools+for+investment+banking+analysts", topic: "AI", creator: "Search", school: "YouTube search", type: "YouTube" },
+  { title: "CFA Level I Crash Course: Financial Statement Analysis, Day 1 (FinTree)", url: "https://www.youtube.com/live/3wkW0mD21BE", topic: "Accounting", creator: "Utkarsh Jain", school: "FinTree", type: "YouTube" },
+  { title: "Investment Banking Full Course for Beginners (Intellipaat)", url: "https://www.youtube.com/live/bCHXpIayiUk", topic: "Markets", creator: "Intellipaat", school: "Intellipaat", type: "YouTube" },
+  { title: "Aswath Damodaran: Valuation playlist (DCF and relative valuation)", url: "https://www.youtube.com/playlist?list=PLeBox1GIuOW_7LAvk-Iz-Vm5luPJhu6_H", topic: "DCF", creator: "Aswath Damodaran", school: "NYU Stern", type: "YouTube" },
+  { title: "Aswath Damodaran: Session 12, first principles of valuation", url: "https://www.youtube.com/watch?v=iqyAHpXZ0Ws", topic: "DCF", creator: "Aswath Damodaran", school: "NYU Stern", type: "YouTube" },
+  { title: "MS Excel full playlist (TutorialsPoint, 101 videos)", url: "https://www.youtube.com/playlist?list=PLWPirh4EWFpEpO6NjjWLbKSCb-wx3hMql", topic: "Excel", creator: "TutorialsPoint", school: "TutorialsPoint", type: "YouTube" },
+  { title: "FREE Microsoft Excel Course by Chandoo (12 videos)", url: "https://www.youtube.com/playlist?list=PLmejDGrsgFyCZ4YC5s8mgdQztj7zt5to5", topic: "Excel", creator: "Chandoo", school: "Chandoo.org", type: "YouTube" },
+  // Website / course
+  { title: "Financial Modeling Videos: curated list", url: "https://finamodel.com/videos", topic: "Financial Modelling", creator: "Finamodel", school: "Finamodel", type: "Website" },
+  { title: "Excel for Finance: 8-episode series", url: "https://www.cfainstitute.org/insights/excel-skills-finance-professionals", topic: "Excel", creator: "Excel MVPs", school: "CFA Institute", type: "Website" },
+  { title: "Financial Modelling & Valuation track (paid)", url: "https://www.nseindia.com/static/learn/financial-modelling-and-valuation-themed-track", topic: "Financial Modelling", creator: "NSE Academy", school: "NSE Academy", type: "Website" }
+];
+
+const RESOURCES = [
+  { group: "Excel and modelling", items: [
+    ["Microsoft Excel help and learning", "https://support.microsoft.com/excel", "Free"],
+    ["Corporate Finance Institute", "https://corporatefinanceinstitute.com/", "Free and paid"],
+    ["Finamodel: free YouTube model lessons", "https://finamodel.com/videos", "Free"],
+    ["Wall Street Prep quick lessons", "https://www.wallstreetprep.com/", "Free and paid"]
+  ]},
+  { group: "Indian company data", items: [
+    ["Screener: Indian company financials", "https://www.screener.in/", "Free"],
+    ["NSE India: filings and corporate announcements", "https://www.nseindia.com/", "Free"],
+    ["BSE India: annual reports and filings", "https://www.bseindia.com/", "Free"]
+  ]},
+  { group: "Theory and valuation", items: [
+    ["Aswath Damodaran: valuation lectures and data", "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/equity.html", "Free"],
+    ["CFA Institute: Excel for finance professionals", "https://www.cfainstitute.org/insights/excel-skills-finance-professionals", "Free"],
+    ["Damodaran: Valuation MBA webcasts (Spring 2025, with slides)", "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/webcasteqspr25.htm", "Free"]
+  ]},
+  { group: "Certificates and courses", items: [
+    ["NSE Academy: Financial Modelling & Valuation track", "https://www.nseindia.com/static/learn/financial-modelling-and-valuation-themed-track", "Paid, 135 hours"]
+  ]},
+  { group: "AI tools for IB (search links)", items: [
+    ["S&P Capital IQ", "https://www.google.com/search?q=S%26P+Capital+IQ", "Bank-licensed"],
+    ["PitchBook", "https://www.google.com/search?q=PitchBook", "Bank-licensed"],
+    ["AlphaSense", "https://www.google.com/search?q=AlphaSense", "Bank-licensed"],
+    ["Rogo (finance AI platform)", "https://www.google.com/search?q=Rogo+AI+investment+banking", "Bank-licensed"],
+    ["Hebbia (document AI)", "https://www.google.com/search?q=Hebbia+AI", "Bank-licensed"],
+    ["Microsoft Copilot in Excel", "https://www.google.com/search?q=Microsoft+Copilot+Excel", "Microsoft 365"],
+    ["Claude (general AI assistant)", "https://claude.ai", "Free and paid"],
+    ["think-cell, Macabacus, UpSlide (PowerPoint add-ins)", "https://www.google.com/search?q=think-cell+Macabacus+UpSlide", "Paid"]
+  ]},
+  { group: "Job portals", items: [
+    ["Goldman Sachs India: student programmes", "https://www.goldmansachs.com/careers/students/programs-and-internships/india/", "Check openings"],
+    ["J.P. Morgan: student programmes", "https://careers.jpmorgan.com/students/programs", "Check openings"],
+    ["Morgan Stanley: careers", "https://www.morganstanley.com/people-opportunities", "Check openings"],
+    ["Avendus", "https://www.avendus.com/", "Check openings"]
+  ]}
+];
+
+const PROJECTS = [
+  {
+    title: "Financial statement analysis: Infosys or Tata Motors",
+    meta: "Month 2 · 3–5 page report",
+    desc: "Analyse three years of a listed company's performance using its annual report.",
+    src: ["Infosys annual reports: investors.infosys.com", "Tata Motors annual reports: tatamotors.com", "Screener.in for quick ratios"],
+    steps: [
+      "Download the last three annual reports",
+      "Build a table: revenue, EBITDA, net profit, operating cash flow",
+      "Compute margins, debt-to-equity, ROE and ROCE for each year",
+      "Read the notes to accounts on debt and one-off items",
+      "Write five observations and two risks",
+      "Add charts and format as a 3–5 page report"
+    ]
+  },
+  {
+    title: "DCF valuation of a listed Indian company",
+    meta: "Month 5 · linked Excel model",
+    desc: "Forecast free cash flows, estimate WACC, and value the company with sensitivity tables.",
+    src: ["Annual report for cash flow and capex", "NSE/BSE filings for share count and price", "Screener.in for beta-style inputs and history"],
+    steps: [
+      "Forecast revenue and margins for 5 years",
+      "Derive free cash flow from EBIT, tax, capex, working capital",
+      "Estimate cost of equity, cost of debt, and WACC with written assumptions",
+      "Calculate terminal value and discount cash flows",
+      "Get enterprise value, then equity value per share",
+      "Build a sensitivity table on WACC and terminal growth"
+    ]
+  },
+  {
+    title: "Trading comparables: two competitors",
+    meta: "Month 5 · comps table",
+    desc: "Compare EV/EBITDA and P/E for a company and its listed peers.",
+    src: ["Screener.in for market cap, EV and multiples", "Annual reports for EBITDA and net profit"],
+    steps: [
+      "Pick the company and two or three listed peers",
+      "Collect market cap, net debt, EBITDA, net profit for each",
+      "Compute EV, EV/EBITDA, and P/E",
+      "Compare results and explain the differences",
+      "Apply peer median multiples to the company's EBITDA"
+    ]
+  },
+  {
+    title: "M&A pitchbook on a public acquisition",
+    meta: "Month 6 · 6–10 slides",
+    desc: "Explain a real announced acquisition: rationale, structure, synergies, risks.",
+    src: ["Company press releases and investor presentations", "NSE/BSE announcements for deal terms", "News coverage for the deal rationale"],
+    steps: [
+      "Choose a publicly announced Indian or global deal",
+      "Summarise the strategic rationale in one slide",
+      "Show deal structure, price, and funding",
+      "Estimate synergies and accretion/dilution",
+      "List key risks and what would change your view",
+      "Build a 6–10 slide PowerPoint"
+    ]
+  },
+  {
+    title: "AI-checked comps: verify an AI output",
+    meta: "Ongoing · AI skill project",
+    desc: "Use AI to build a comps table, then check every number against public filings. Record what it got wrong.",
+    src: ["Screener.in for market data", "Annual reports and NSE/BSE filings for every figure"],
+    steps: [
+      "Pick one listed company and three peers",
+      "Ask an AI tool for revenue, EBITDA, net debt, and market cap for each, with sources",
+      "Check every figure against the annual report or filing",
+      "Log each error: wrong number, wrong period, wrong units, or missing source",
+      "Rebuild the table by hand in Excel and compare",
+      "Write three rules for when you can and cannot trust AI output on financial data"
+    ]
+  }
+];
+
+// ---------- STATE ----------
+const KEY_VID = "finlearn-ib-videos-v1";
+const KEY_PROG = "finlearn-ib-progress-v1";
+let videos = SEED.slice();
+let progress = {};
+try { const saved = JSON.parse(localStorage.getItem(KEY_VID)); if (Array.isArray(saved)) videos = saved; } catch {}
+try { progress = JSON.parse(localStorage.getItem(KEY_PROG)) || {}; } catch {}
+const saveVideos = () => { try { localStorage.setItem(KEY_VID, JSON.stringify(videos)); } catch {} };
+const saveProgress = () => { try { localStorage.setItem(KEY_PROG, JSON.stringify(progress)); } catch {} };
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const PALETTE = [["#2f4a2a","#5fae4a"],["#3b5a33","#8ed16a"],["#3c5230","#b6e07a"],["#2a4222","#4f9a3e"],["#374f2c","#7fc257"],["#33472b","#a6d989"]];
+const grad = s => { const [a,b] = PALETTE[[...s].reduce((x,c)=>x+c.charCodeAt(0),0) % PALETTE.length]; return `linear-gradient(135deg,${a},${b})`; };
+const uniq = key => [...new Set(videos.map(v => v[key]))].filter(Boolean).sort();
+
+// ---------- VIEWS ----------
+let activeView = "home";
+function show(view) {
+  activeView = view;
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("show", v.id === "v-" + view));
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+  window.scrollTo(0, 0);
+}
+
+function tile(v) {
+  const badge = v.type === "Website" ? `<span class="badge web">Website</span>` : `<span class="badge">YouTube</span>`;
+  return `<a class="tile" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">
+    <div class="thumb" style="background:${topicGrad(v.topic)}"><span>${esc(v.title)}</span></div>
+    <div class="info"><b>${esc(v.creator)}</b>${esc(v.school)}<br>${badge}</div>
+  </a>`;
+}
+
+function renderHome() {
+  $("homeRows").innerHTML = TOPICS.map(t => {
+    const list = videos.filter(v => v.topic === t.name);
+    return `<div class="row">
+      <div class="row-head"><h2 style="color:${(TOPIC_COLOR[t.name] || [0, "#fff"])[1]}">${esc(t.name)}</h2><button class="see" data-open-topic="${esc(t.name)}">See all (${list.length}) &rsaquo;</button></div>
+      <div class="slider">
+        <button class="topic-card" data-open-topic="${esc(t.name)}" style="background:${topicGrad(t.name)}"><div class="art" aria-hidden="true">${TOPIC_ART[t.name] || ""}</div>
+          <span class="n">${list.length} videos</span>
+          <span class="t">${esc(t.name)}</span>
+          <span class="s">${esc(t.desc)}</span>
+        </button>
+        ${list.slice(0, 12).map(tile).join("")}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// Videos view with filters
+function fillSel(sel, values, label) {
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${label}</option>` + values.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
+  sel.value = values.includes(cur) ? cur : "";
+}
+function refreshFilters() {
+  fillSel($("fTopic"), TOPICS.map(t => t.name), "All topics");
+  fillSel($("fCreator"), uniq("creator"), "All teachers / creators");
+  fillSel($("fSchool"), uniq("school"), "All schools / channels");
+  fillSel($("a-topic"), TOPICS.map(t => t.name), "Topic");
+}
+function renderVideos() {
+  const t = $("fTopic").value, c = $("fCreator").value, s = $("fSchool").value, ty = $("fType").value;
+  const q = $("q").value.trim().toLowerCase();
+  const list = videos.filter(v =>
+    (!t || v.topic === t) && (!c || v.creator === c) && (!s || v.school === s) && (!ty || v.type === ty) &&
+    (!q || (v.title + " " + v.topic + " " + v.creator + " " + v.school).toLowerCase().includes(q))
+  );
+  $("videosTitle").textContent = t ? t : "All videos";
+  $("videosSub").textContent = `${list.length} of ${videos.length} videos`;
+  $("grid").innerHTML = list.length ? list.map(tile).join("") : `<div class="empty">No videos match these filters.</div>`;
+}
+function openTopic(name) {
+  refreshFilters();
+  $("fTopic").value = name;
+  $("fCreator").value = ""; $("fSchool").value = ""; $("fType").value = "";
+  $("q").value = "";
+  renderVideos();
+  show("videos");
+}
+
+// Resources
+function renderResources() {
+  $("resList").innerHTML = RESOURCES.map(g => `
+    <div class="res-group"><h3>${esc(g.group)}</h3>
+      ${g.items.map(([name, url, tag]) => `
+        <div class="res"><div><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(name)}</a><br><span>${esc(url)}</span></div><span class="tag">${esc(tag)}</span></div>`).join("")}
+    </div>`).join("");
+}
+
+// Projects
+function renderProjects() {
+  $("projList").innerHTML = PROJECTS.map((p, i) => {
+    const done = p.steps.filter((_, j) => progress[`${i}-${j}`]).length;
+    return `<div class="proj ${done === p.steps.length ? "done" : ""}" id="p-${i}">
+      <div class="proj-head" data-proj="${i}">
+        <div><h3>${esc(p.title)}</h3><div class="meta">${esc(p.meta)}</div></div>
+        <div class="pct">${done}/${p.steps.length}</div>
+      </div>
+      <div class="proj-body">
+        <p>${esc(p.desc)}</p>
+        <div class="src"><b>Public data:</b> ${p.src.map(esc).join(" · ")}</div>
+        ${p.steps.map((s, j) => `
+          <label class="step ${progress[`${i}-${j}`] ? "done" : ""}">
+            <input type="checkbox" data-pk="${i}-${j}" ${progress[`${i}-${j}`] ? "checked" : ""}>
+            <span>${esc(s)}</span>
+          </label>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ---------- EVENTS ----------
+document.getElementById("tabs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-view]");
+  if (!b) return;
+  const v = b.dataset.view;
+  if (v === "videos") { refreshFilters(); renderVideos(); }
+  if (v === "resources") renderResources();
+  if (v === "projects") renderProjects();
+  if (v === "add") refreshFilters();
+  show(v);
+});
+
+document.addEventListener("click", e => {
+  const ot = e.target.closest("[data-open-topic]");
+  if (ot) { openTopic(ot.dataset.openTopic); return; }
+  const vl = e.target.closest("[data-view-link]");
+  if (vl) { const v = vl.dataset.viewLink; if (v === "projects") renderProjects(); if (v === "resources") renderResources(); show(v); return; }
+  const ph = e.target.closest("[data-proj]");
+  if (ph) { const card = $("p-" + ph.dataset.proj); card.classList.toggle("open"); return; }
+});
+
+document.addEventListener("change", e => {
+  if (e.target.matches("input[data-pk]")) {
+    const k = e.target.dataset.pk;
+    progress[k] = e.target.checked;
+    saveProgress();
+    renderProjects();
+    const card = $("p-" + k.split("-")[0]);
+    if (card) card.classList.add("open");
+  }
+});
+
+["fTopic","fCreator","fSchool","fType"].forEach(id => $(id).addEventListener("change", renderVideos));
+$("q").addEventListener("input", () => { if (activeView !== "videos") { refreshFilters(); show("videos"); } renderVideos(); });
+
+$("aBtn").addEventListener("click", () => {
+  const v = {
+    title: $("a-title").value.trim(),
+    url: $("a-url").value.trim(),
+    topic: $("a-topic").value,
+    creator: $("a-creator").value.trim() || "Unknown",
+    school: $("a-school").value.trim() || "Unknown",
+    type: $("a-type").value
+  };
+  let ok = false;
+  try { new URL(v.url); ok = /^https?:/.test(v.url); } catch {}
+  if (!v.title || !ok || !v.topic) { alert("Add a title, a valid link, and a topic."); return; }
+  videos.push(v); saveVideos();
+  ["a-title","a-url","a-creator","a-school"].forEach(id => $(id).value = "");
+  refreshFilters();
+  openTopic(v.topic);
+});
+
+window.addEventListener("scroll", (() => {
+  let ticking = false, solid = false;
+  const money = $("money"), notes = $("heroNotes");
+  return () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      if ((y > 40) !== solid) { solid = y > 40; $("nav").classList.toggle("solid", solid); }
+      money.style.setProperty("--sy", y);
+      if (y < 900) notes.style.setProperty("--sy", y);
+      ticking = false;
+    });
+  };
+})(), { passive: true });
+
+const TOPIC_COLOR = {
+  "Excel": ["#14532d", "#22c55e"],
+  "Accounting": ["#0e4a4a", "#2dd4bf"],
+  "Corporate Finance": ["#7c4a03", "#f59e0b"],
+  "Financial Modelling": ["#1e3a8a", "#60a5fa"],
+  "DCF": ["#7f1d4a", "#ec4899"],
+  "Comps": ["#3f6212", "#a3e635"],
+  "M&A": ["#4c1d95", "#a78bfa"],
+  "LBO": ["#7c2d12", "#fb923c"],
+  "Markets": ["#0c4a6e", "#38bdf8"],
+  "Interviews": ["#713f12", "#facc15"],
+  "AI": ["#3b0764", "#e879f9"]
+};
+const topicGrad = name => {
+  const [a, b] = TOPIC_COLOR[name] || ["#2e3a2b", "#9db38a"];
+  return `linear-gradient(135deg, ${a}, ${b})`;
+};
+
+const TOPIC_ART = {
+  "Excel": `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#0f3a22"/><g stroke="#ffffff" stroke-opacity=".12"><path d="M0 37H400M0 75H400M0 112H400M0 150H400M0 187H400M57 0V225M114 0V225M171 0V225M228 0V225M285 0V225M342 0V225"/></g><rect x="60" y="120" width="32" height="80" fill="#3f9a52"/><rect x="117" y="95" width="32" height="105" fill="#3f9a52"/><rect x="174" y="70" width="32" height="130" fill="#d98a2b"/><rect x="231" y="50" width="32" height="150" fill="#e0558f"/><rect x="288" y="30" width="32" height="170" fill="#d98a2b"/><polyline points="76,110 133,85 190,60 247,40 304,22" fill="none" stroke="#f2f7ef" stroke-width="3"/><circle cx="304" cy="22" r="5" fill="#f2f7ef"/></svg>`,
+  "Accounting": `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#123d2c"/><rect x="40" y="30" width="150" height="165" rx="6" fill="#1f5a41" stroke="#f2f7ef" stroke-opacity=".4"/><rect x="210" y="30" width="150" height="165" rx="6" fill="#1f5a41" stroke="#f2f7ef" stroke-opacity=".4"/><g stroke="#f2f7ef" stroke-opacity=".5" stroke-width="2"><path d="M190 30V195"/><path d="M60 60H170M60 85H170M60 110H170M60 135H170M230 60H340M230 85H340M230 110H340M230 135H340"/></g><g fill="#e0558f"><rect x="62" y="46" width="70" height="6" rx="2"/><rect x="232" y="46" width="70" height="6" rx="2"/></g><g fill="#d98a2b"><rect x="62" y="121" width="50" height="6" rx="2"/><rect x="232" y="121" width="50" height="6" rx="2"/></g></svg>`,
+  "Corporate Finance": `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#3a2410"/><g fill="#d98a2b" stroke="#fff3d6" stroke-width="2"><ellipse cx="90" cy="180" rx="38" ry="10"/><ellipse cx="90" cy="170" rx="38" ry="10"/><ellipse cx="90" cy="160" rx="38" ry="10"/><ellipse cx="150" cy="180" rx="38" ry="10"/><ellipse cx="150" cy="170" rx="38" ry="10"/></g><path d="M190 170 C240 150 270 120 330 70" fill="none" stroke="#3f9a52" stroke-width="5"/><path d="M318 66 L334 64 L330 80 Z" fill="#3f9a52"/><text x="250" y="200" font-family="Arial" font-size="16" fill="#fff3d6" opacity=".8">NPV  IRR  WACC</text></svg>`,
+  "Financial Modelling": `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#1b1f3a"/><g stroke="#f2f7ef" stroke-opacity=".35" fill="#24305c"><rect x="60" y="40" width="130" height="90" rx="4"/><rect x="140" y="75" width="130" height="90" rx="4"/><rect x="220" y="110" width="130" height="90" rx="4"/></g><g stroke="#e0558f" stroke-width="2" fill="none"><path d="M190 85 L210 110"/><path d="M270 120 L290 145"/></g><g fill="#3f9a52"><rect x="78" y="60" width="40" height="6"/><rect x="78" y="80" width="60" height="6"/><rect x="158" y="95" width="40" height="6"/><rect x="238" y="130" width="40" height="6"/></g></svg>`,
+  "DCF": `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#4a1030"/><rect x="50" y="150" width="28" height="45" fill="#e0558f" opacity=".6"/><rect x="100" y="130" width="28" height="65" fill="#e0558f" opacity=".7"/><rect x="150" y="110" width="28" height="85" fill="#e0558f" opacity=".8"/><rect x="200" y="85" width="28" height="110" fill="#e0558f"/><rect x="250" y="60" width="28" height="135" fill="#d98a2b"/><circle cx="330" cy="110" r="42" fill="none" stroke="#fff3d6" stroke-width="4"/><text x="330" y="118" text-anchor="middle" font-family="Arial" font-size="20" font-weight="700" fill="#fff3d6">PV</text></svg>`,
+  "Comps": `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#0f3b2a"/><path d="M40 190 L370 40" stroke="#f2f7ef" stroke-opacity=".4" stroke-dasharray="6 6" stroke-width="2"/><g fill="#d98a2b"><circle cx="90" cy="170" r="9"/><circle cx="150" cy="140" r="9"/><circle cx="210" cy="120" r="9"/><circle cx="270" cy="90" r="9"/></g><circle cx="330" cy="60" r="12" fill="#e0558f"/><circle cx="330" cy="60" r="20" fill="none" stroke="#e0558f" stroke-width="2"/></svg>`,
+  "M&A": `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#2a1a40"/><circle cx="150" cy="112" r="70" fill="#b8236e" opacity=".55"/><circle cx="250" cy="112" r="70" fill="#3f9a52" opacity=".55"/><path d="M190 80 L210 112 L190 144" fill="none" stroke="#fff3d6" stroke-width="4"/><text x="200" y="200" text-anchor="middle" font-family="Arial" font-size="16" fill="#fff3d6" opacity=".85">Accretion / Dilution</text></svg>`,
+  "LBO": `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#132a3a"/><rect x="110" y="150" width="180" height="38" fill="#1d5566" stroke="#f2f7ef" stroke-opacity=".4"/><rect x="110" y="112" width="180" height="38" fill="#2b7a8f" stroke="#f2f7ef" stroke-opacity=".4"/><rect x="110" y="74" width="180" height="38" fill="#d98a2b" stroke="#f2f7ef" stroke-opacity=".4"/><text x="200" y="98" text-anchor="middle" font-family="Arial" font-size="14" fill="#fff">Debt</text><text x="200" y="136" text-anchor="middle" font-family="Arial" font-size="14" fill="#fff">Sponsor equity</text><path d="M320 180 L320 50" stroke="#3f9a52" stroke-width="4"/><path d="M308 62 L320 40 L332 62" fill="#3f9a52"/></svg>`,
+  "Markets": `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#0c1f16"/><g stroke-width="3"><path d="M60 40V180" stroke="#3f9a52"/><rect x="52" y="70" width="16" height="60" fill="#3f9a52"/><path d="M120 60V170" stroke="#e0558f"/><rect x="112" y="90" width="16" height="50" fill="#e0558f"/><path d="M180 50V160" stroke="#3f9a52"/><rect x="172" y="60" width="16" height="70" fill="#3f9a52"/><path d="M240 70V190" stroke="#e0558f"/><rect x="232" y="100" width="16" height="60" fill="#e0558f"/><path d="M300 30V150" stroke="#3f9a52"/><rect x="292" y="45" width="16" height="80" fill="#3f9a52"/></g></svg>`,
+  "Interviews": `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#3a1a10"/><path d="M70 50 H200 V100 H110 L80 118 V100 H70 Z" fill="#d98a2b"/><text x="135" y="82" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700" fill="#3a1a10">?</text><path d="M200 120 H330 V170 H300 L290 186 V170 H200 Z" fill="#3f9a52"/><text x="265" y="152" text-anchor="middle" font-family="Arial" font-size="26" font-weight="700" fill="#fff">✓</text></svg>`,
+  "AI": `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#0a0f1f"/><g stroke="#3f9a52" stroke-opacity=".6" stroke-width="2"><path d="M60 60 L140 110 L220 60 L300 120 L360 70"/><path d="M60 150 L140 110 L220 160 L300 120 L360 170"/><path d="M140 110 L220 60 M220 160 L300 120"/></g><g fill="#e0558f"><circle cx="60" cy="60" r="8"/><circle cx="60" cy="150" r="8"/><circle cx="220" cy="160" r="8"/><circle cx="360" cy="170" r="8"/></g><g fill="#d98a2b"><circle cx="140" cy="110" r="10"/><circle cx="300" cy="120" r="10"/><circle cx="220" cy="60" r="8"/><circle cx="360" cy="70" r="8"/></g></svg>`
+};
+
+// Falling US dollar background
+const DOLLAR_SVG = `<svg viewBox="0 0 600 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="100 US dollar bill">
+<defs><linearGradient id="gUS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d4e6c6"/><stop offset="1" stop-color="#8fb48a"/></linearGradient></defs>
+<rect width="600" height="260" rx="10" fill="url(#gUS)"/>
+<rect x="10" y="10" width="580" height="240" rx="6" fill="none" stroke="#3d6b43" stroke-width="3"/>
+<rect x="22" y="22" width="556" height="216" rx="4" fill="none" stroke="#3d6b43" stroke-width="1.5" stroke-dasharray="4 3"/>
+<rect x="100" y="27" width="400" height="24" rx="5" fill="#ffe08a" stroke="#2f5a36" stroke-width="1.5"/>
+<text x="300" y="44" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="700" letter-spacing="2.5" fill="#1f3d25">THE UNITED STATES OF AMERICA</text>
+<text x="40" y="80" font-family="Georgia,serif" font-size="38" font-weight="700" fill="#2f5a36">100</text>
+<text x="560" y="222" text-anchor="end" font-family="Georgia,serif" font-size="38" font-weight="700" fill="#2f5a36">100</text>
+<circle cx="112" cy="130" r="40" fill="none" stroke="#2f5a36" stroke-width="2"/>
+<circle cx="112" cy="130" r="26" fill="#b9d1ac" stroke="#2f5a36" stroke-width="1.5"/>
+<ellipse cx="300" cy="130" rx="92" ry="112" fill="#a8c79a" stroke="#2f5a36" stroke-width="3"/>
+<ellipse cx="300" cy="130" rx="72" ry="92" fill="#dcebd2" stroke="#2f5a36" stroke-width="1.5"/>
+<circle cx="300" cy="108" r="30" fill="#6e8f66"/>
+<path d="M246 205 Q300 150 354 205 L354 226 L246 226 Z" fill="#6e8f66"/>
+<text x="112" y="137" text-anchor="middle" font-family="Georgia,serif" font-size="19" font-weight="700" fill="#2f5a36">100</text>
+<path d="M412 58V214" stroke="#3d6b43" stroke-width="3" stroke-dasharray="6 4" opacity=".7"/>
+<circle cx="490" cy="142" r="30" fill="none" stroke="#2f5a36" stroke-width="2.5"/>
+<circle cx="490" cy="142" r="22" fill="#b9d1ac" stroke="#2f5a36" stroke-width="1.2" stroke-dasharray="3 2"/>
+<text x="490" y="152" text-anchor="middle" font-family="Georgia,serif" font-size="28" fill="#2f5a36">&#9733;</text>
+<text x="490" y="195" text-anchor="middle" font-family="Georgia,serif" font-size="9" letter-spacing="1" fill="#2f5a36">LEGAL TENDER</text>
+<text x="560" y="74" text-anchor="end" font-family="'Courier New',monospace" font-size="13" font-weight="700" fill="#7a1f1f">L 42096731 A</text>
+<text x="40" y="222" font-family="'Courier New',monospace" font-size="13" font-weight="700" fill="#7a1f1f">L 42096731 A</text>
+</svg>`;
+const RUPEE_SVG = `<svg viewBox="0 0 600 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2000 rupee note">
+<defs><linearGradient id="gIN" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b8236e"/><stop offset="0.6" stop-color="#e0558f"/><stop offset="1" stop-color="#f6b7d1"/></linearGradient></defs>
+<rect width="600" height="260" rx="10" fill="url(#gIN)"/>
+<rect x="10" y="10" width="580" height="240" rx="6" fill="none" stroke="#6b1140" stroke-width="3"/>
+<rect x="135" y="22" width="330" height="26" rx="5" fill="#ffe08a" stroke="#6b1140" stroke-width="1.5"/>
+<text x="300" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="3" fill="#4a0a2b">RESERVE BANK OF INDIA</text>
+<text x="34" y="78" font-family="Arial,sans-serif" font-size="34" font-weight="700" fill="#fff0f6">2000</text>
+<text x="566" y="224" text-anchor="end" font-family="Arial,sans-serif" font-size="34" font-weight="700" fill="#fff0f6">2000</text>
+<rect x="200" y="70" width="120" height="150" rx="6" fill="#f9d3e4" stroke="#6b1140" stroke-width="2"/>
+<circle cx="260" cy="104" r="26" fill="#8a2a5c"/>
+<path d="M212 200 Q260 140 308 200 L308 216 L212 216 Z" fill="#8a2a5c"/>
+<text x="420" y="150" text-anchor="middle" font-family="Arial,sans-serif" font-size="64" font-weight="700" fill="#fff0f6">₹</text>
+<circle cx="90" cy="130" r="34" fill="none" stroke="#fff0f6" stroke-width="2"/>
+<circle cx="90" cy="130" r="22" fill="#f9d3e4" stroke="#6b1140" stroke-width="1.5"/>
+<g stroke="#6b1140" stroke-width="1.5" fill="none"><circle cx="90" cy="130" r="13"/><path d="M90 117V143M77 130H103M80.8 120.8L99.2 139.2M99.2 120.8L80.8 139.2"/></g>
+<path d="M345 58V232" stroke="#fff0f6" stroke-width="3" stroke-dasharray="6 4" opacity=".55"/>
+<text x="566" y="74" text-anchor="end" font-family="'Courier New',monospace" font-size="13" font-weight="700" fill="#fff0f6">3AB 123456</text>
+<text x="34" y="224" font-family="'Courier New',monospace" font-size="13" font-weight="700" fill="#fff0f6">3AB 123456</text>
+<text x="450" y="104" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="2" fill="#fff0f6">NEW SERIES</text>
+</svg>`;
+function makeBills() {
+  const layer = document.getElementById("money");
+  const values = [1, 5, 10, 20, 50, 100];
+  const n = window.innerWidth < 700 ? 8 : 16;
+  for (let i = 0; i < n; i++) {
+    const b = document.createElement("div");
+    const w = 150 + Math.random() * 170;
+    const v = values[i % values.length];
+    b.className = "bill";
+    b.style.setProperty("--w", w.toFixed(0) + "px");
+    b.style.left = (Math.random() * 100).toFixed(1) + "%";
+    b.style.setProperty("--dx", ((Math.random() - 0.5) * 30).toFixed(1) + "vw");
+    b.style.setProperty("--r0", ((Math.random() - 0.5) * 40).toFixed(0) + "deg");
+    b.style.setProperty("--r1", ((Math.random() - 0.5) * 240).toFixed(0) + "deg");
+    b.style.setProperty("--t", (16 + Math.random() * 18).toFixed(1) + "s");
+    b.style.setProperty("--d", (-Math.random() * 30).toFixed(1) + "s");
+    b.style.setProperty("--o", (0.5 + Math.random() * 0.25).toFixed(2));
+    const inr = i % 3 === 0;
+    b.className = "bill svgbill";
+    b.dataset.label = inr ? "INDIAN RUPEE" : "US DOLLAR";
+    const sym = inr ? "₹" : "$";
+    const amt = inr ? [10, 50, 100, 500, 2000][i % 5] : v;
+    b.innerHTML = inr ? RUPEE_SVG : DOLLAR_SVG;
+    layer.appendChild(b);
+  }
+}
+makeBills();
+
+// Back navigation: remembers the previous view, topic and filters
+const navHist = [];
+let restoring = false;
+const snapshot = () => ({ view: activeView, t: $("fTopic").value, c: $("fCreator").value, s: $("fSchool").value, ty: $("fType").value, q: $("q").value });
+function updateBack() { $("backBtn").disabled = navHist.length === 0; }
+function pushHist() {
+  if (restoring) return;
+  const s = snapshot();
+  const top = navHist[navHist.length - 1];
+  if (top && JSON.stringify(top) === JSON.stringify(s)) return;
+  navHist.push(s);
+  updateBack();
+}
+function applySnap(s) {
+  restoring = true;
+  if (s.view === "videos") {
+    refreshFilters();
+    $("fTopic").value = s.t; $("fCreator").value = s.c; $("fSchool").value = s.s; $("fType").value = s.ty;
+    $("q").value = s.q;
+    renderVideos();
+  } else if (s.view === "resources") renderResources();
+  else if (s.view === "projects") renderProjects();
+  else if (s.view === "home") renderHome();
+  else if (s.view === "add") refreshFilters();
+  show(s.view);
+  restoring = false;
+  updateBack();
+}
+$("backBtn").addEventListener("click", () => { if (navHist.length) applySnap(navHist.pop()); updateBack(); });
+document.addEventListener("click", e => {
+  if (e.target.closest("[data-open-topic],[data-view-link],#tabs button[data-view]")) pushHist();
+}, true);
+updateBack();
+
+document.getElementById("heroNotes").innerHTML = DOLLAR_SVG + RUPEE_SVG;
+
+// Notes spread across the table in the hero
+{
+  const pile = document.getElementById("heroPile");
+  for (let i = 0; i < (window.innerWidth < 700 ? 14 : 24); i++) {
+    const d = document.createElement("div");
+    d.className = "n";
+    d.style.setProperty("--t", (7 + Math.random() * 9).toFixed(1) + "s");
+    d.style.setProperty("--mx", ((Math.random() - 0.5) * 50).toFixed(0) + "px");
+    d.style.setProperty("--my", ((Math.random() - 0.5) * 50).toFixed(0) + "px");
+    d.style.setProperty("--w", (170 + Math.random() * 90).toFixed(0) + "px");
+    d.style.left = (Math.random() * 110 - 5).toFixed(1) + "%";
+    d.style.top = (Math.random() * 110 - 5).toFixed(1) + "%";
+    d.style.setProperty("--r", ((Math.random() - 0.5) * 160).toFixed(0) + "deg");
+    d.innerHTML = i % 2 ? RUPEE_SVG : DOLLAR_SVG;
+    pile.appendChild(d);
+  }
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(e => pile.classList.toggle("paused", !e[0].isIntersecting)).observe(pile);
+  }
+}
+
+// Boot
+refreshFilters();
+renderHome();
+</script>
+</body>
+</html>
