@@ -113,7 +113,13 @@ nav.solid { background: var(--bg2); }
 .step input { margin-top: 3px; accent-color: var(--ok); }
 .step.done span { color: var(--muted); text-decoration: line-through; }
 
-/* ADD FORM */
+/* FORAGE LINK CARD */
+.forage { display: flex; justify-content: space-between; align-items: center; gap: 14px; background: #1f1f1f; border: 1px solid var(--line); border-left: 4px solid var(--ok); border-radius: 8px; padding: 16px; margin-bottom: 18px; text-decoration: none; color: #fff; transition: background .2s; }
+.forage:hover { background: #262626; }
+.forage b { display: block; font-size: 16px; margin-bottom: 4px; }
+.forage span { font-size: 13px; color: var(--muted); }
+.forage .go { flex: none; background: #fff; color: #000; font-weight: 600; font-size: 14px; padding: 8px 14px; border-radius: 4px; white-space: nowrap; }
+@media (max-width: 520px) { .forage { flex-direction: column; align-items: flex-start; } }
 .form { display: grid; gap: 10px; grid-template-columns: 1fr; max-width: 640px; }
 @media (min-width: 640px) { .form { grid-template-columns: 1fr 1fr; } }
 .form .full { grid-column: 1 / -1; }
@@ -252,6 +258,13 @@ nav::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; heig
   <div class="page">
     <h2>Projects with public data</h2>
     <div class="sub">Real work using public filings. Tick steps as you finish them. Progress saves in this browser.</div>
+    <a class="forage" href="https://www.theforage.com/" target="_blank" rel="noopener noreferrer">
+  <div>
+    <b>Virtual job simulations on The Forage</b>
+    <span>Free work-experience programs from real companies, including banks. Do one alongside the projects below.</span>
+  </div>
+  <div class="go">Open The Forage &rarr;</div>
+</a>
     <div id="projList"></div>
   </div>
 </section>
